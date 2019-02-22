@@ -33,14 +33,24 @@ module.exports = function( _options ) {
         const time_since_last_public_key_update = now - last_public_key_update;
 
         if ( !fetched_public_key || time_since_last_public_key_update > options.grace_period ) {
-            const public_key_request = await fetch( options.public_key_endpoint );
-            if ( !public_key_request.ok ) {
+            fetched_public_key = null;
+
+            try {
+                const public_key_request = await fetch( options.public_key_endpoint );
+                fetched_public_key = public_key_request.ok ? await public_key_request.text() : null;
+
+                if ( !public_key_request.ok ) {
+                    console.warn( `Failed to fetch api gateway public key. (HTTP response code: ${ public_key_request.status })` );
+                }
+            }
+            catch( ex ) {
                 fetched_public_key = null;
-                return fetched_public_key;
+                console.warn( ex && ex.message ? ex.message : ex );
             }
     
-            fetched_public_key = await public_key_request.text();
-            last_public_key_update = now;
+            if ( fetched_public_key ) {
+                last_public_key_update = now;
+            }
         }
 
         return fetched_public_key;
