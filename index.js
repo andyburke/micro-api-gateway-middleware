@@ -62,10 +62,32 @@ module.exports = function( _options ) {
 
         if ( !public_key ) {
             response.statusCode = httpstatuses.internal_server_error;
-            response.setHeader( 'Content-Type', 'application/json' );
+            response.setHeader( 'content-type', 'application/json' );
             response.end( JSON.stringify( {
                 error: 'missing public key',
                 message: `Could not obtain public key from provided endpoint.`
+            } ) );
+            return false;
+        }
+
+        const incoming_request_hash = request.headers[ options.headers.hash ];
+        if ( typeof incoming_request_hash !== 'string' ) {
+            response.statusCode = httpstatuses.bad_request;
+            response.setHeader( 'content-type', 'application/json' );
+            response.end( JSON.stringify( {
+                error: 'missing or malformed request hash',
+                message: 'The request does not have a proper request hash header.'
+            } ) );
+            return false;
+        }
+
+        const incoming_request_hash_signature = request.headers[ options.headers.signature ];
+        if ( typeof incoming_request_hash_signature !== 'string' ) {
+            response.statusCode = httpstatuses.bad_request;
+            response.setHeader( 'content-type', 'application/json' );
+            response.end( JSON.stringify( {
+                error: 'missing or malformed request hash signature',
+                message: 'The request does not have a proper request hash signature header.'
             } ) );
             return false;
         }
@@ -83,7 +105,7 @@ module.exports = function( _options ) {
         const time_delta = now - parseInt( request.headers[ options.headers.time ] );
         if ( time_delta > options.grace_period ) {
             response.statusCode = httpstatuses.bad_request;
-            response.setHeader( 'Content-Type', 'application/json' );
+            response.setHeader( 'content-type', 'application/json' );
             response.end( JSON.stringify( {
                 error: 'expired request',
                 message: 'The request from the API gateway has expired.'
@@ -91,9 +113,9 @@ module.exports = function( _options ) {
             return false;
         }
 
-        if ( request_hash !== request.headers[ options.headers.hash ] ) {
+        if ( request_hash !== incoming_request_hash ) {
             response.statusCode = httpstatuses.bad_request;
-            response.setHeader( 'Content-Type', 'application/json' );
+            response.setHeader( 'content-type', 'application/json' );
             response.end( JSON.stringify( {
                 error: 'invalid request hash',
                 message: 'The request from the API gateway has an invalid request hash.'
@@ -101,11 +123,11 @@ module.exports = function( _options ) {
             return false;
         }
 
-        const request_hash_verified = crypto.createVerify( 'RSA-SHA256' ).update( request_hash ).verify( public_key, request.headers[ options.headers.signature ], 'base64' );
+        const request_hash_verified = crypto.createVerify( 'RSA-SHA256' ).update( request_hash ).verify( public_key, incoming_request_hash_signature, 'base64' );
 
         if ( !request_hash_verified ) {
             response.statusCode = httpstatuses.bad_request;
-            response.setHeader( 'Content-Type', 'application/json' );
+            response.setHeader( 'content-type', 'application/json' );
             response.end( JSON.stringify( {
                 error: 'invalid request hash signature',
                 message: 'The request hash from the API gateway could not be verified.'
