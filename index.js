@@ -1,7 +1,6 @@
 'use strict';
 
 const crypto = require( 'crypto' );
-const extend = require( 'extend' );
 const fetch = require( 'node-fetch' );
 const httpstatuses = require( 'httpstatuses' );
 const json_stable_stringify = require( 'json-stable-stringify' );
@@ -13,6 +12,7 @@ module.exports = function( _options ) {
             hash: 'x-micro-api-gateway-request-hash',
             signature: 'x-micro-api-gateway-signature'
         },
+        headers_to_verify: [],
         public_key_endpoint: null,
         public_key: null,
         grace_period: 1000 * 60 * 5 // 5 minutes of grace on signature time
@@ -92,11 +92,10 @@ module.exports = function( _options ) {
             return false;
         }
 
-        const headers_to_verify = extend( true, {}, request.headers );
-        delete headers_to_verify[ options.headers.hash ];
-        delete headers_to_verify[ options.headers.signature ];
-        delete headers_to_verify[ 'connection' ];
-        delete headers_to_verify[ 'transfer-encoding' ];
+        const headers_to_verify = options.headers_to_verify.reduce( ( _headers_to_verify, header ) => {
+            _headers_to_verify[ header ] = request.headers[ header ];
+            return _headers_to_verify;
+        }, {} );
 
         const request_as_string = [ request.method, request.url, json_stable_stringify( headers_to_verify ) ].join( ':::' );
         const request_hash = crypto.createHash( 'SHA256' ).update( request_as_string ).digest( 'base64' );

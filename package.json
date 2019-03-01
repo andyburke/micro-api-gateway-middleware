@@ -1,6 +1,6 @@
 {
   "name": "micro-api-gateway-middleware",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Middleware to verify a request originated from a particular micro-api-gateway",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,6 @@
   "author": "Andy Burke <andrew.burke@oportun.com>",
   "license": "MIT",
   "dependencies": {
-    "extend": "^3.0.2",
     "httpstatuses": "^3.0.0",
     "json-stable-stringify": "^1.0.1",
     "node-fetch": "^2.3.0"
