@@ -93,7 +93,9 @@ module.exports = function( _options ) {
         }
 
         const headers_to_verify = options.headers_to_verify.reduce( ( _headers_to_verify, header ) => {
-            _headers_to_verify[ header ] = request.headers[ header ];
+            if ( typeof request.headers[ header ] !== 'undefined' ) {
+                _headers_to_verify[ header ] = request.headers[ header ];
+            }
             return _headers_to_verify;
         }, {} );
 
