@@ -102,6 +102,11 @@ module.exports = function( _options ) {
         const request_as_string = [ request.method, request.url, json_stable_stringify( headers_to_verify ) ].join( ':::' );
         const request_hash = crypto.createHash( 'SHA256' ).update( request_as_string ).digest( 'base64' );
 
+        if ( process.env.API_GATEWAY_MIDDLEWARE_DEBUG ) {
+            console.log( `VERIFY REQ: ${ request_as_string }` );
+            console.log( `VERIFY HASH: ${ request_hash }` );
+        }
+
         const now = +new Date();
         const time_delta = now - parseInt( request.headers[ options.headers.time ] );
         if ( time_delta > options.grace_period ) {
