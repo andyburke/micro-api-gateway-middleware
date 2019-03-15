@@ -6,6 +6,11 @@ const httpstatuses = require( 'httpstatuses' );
 const json_stable_stringify = require( 'json-stable-stringify' );
 
 module.exports = function( _options ) {
+
+    if ( process.env.SKIP_GATEWAY_VERIFICATION ) {
+        console.warn( '!!! API GATEWAY VERIFICATION WILL BE SKIPPED (SKIP_GATEWAY_VERIFICATION SET IN ENV) !!!' );
+    }
+
     const options = Object.assign( {
         headers: {
             time: 'x-micro-api-gateway-signature-time',
@@ -57,6 +62,12 @@ module.exports = function( _options ) {
     }
 
     return async ( request, response ) => {
+
+        // if SKIP_GATEWAY_VERIFICATION is set, just return true
+        // this should be used for internal testing only
+        if ( process.env.SKIP_GATEWAY_VERIFICATION ) {
+            return true;
+        }
 
         const public_key = await get_public_key();
 
