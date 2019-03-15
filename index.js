@@ -24,7 +24,7 @@ module.exports = function( _options ) {
     }, _options );
 
     if ( !( options.public_key_endpoint || options.public_key ) ) {
-        throw new Error( 'You must specify a public key or public key endpoint!')
+        throw new Error( 'You must specify a public key or public key endpoint!' );
     }
 
     let fetched_public_key = null;
@@ -76,7 +76,7 @@ module.exports = function( _options ) {
             response.setHeader( 'content-type', 'application/json' );
             response.end( JSON.stringify( {
                 error: 'missing public key',
-                message: `Could not obtain public key from provided endpoint.`
+                message: 'Could not obtain public key from provided endpoint.'
             } ) );
             return false;
         }
