@@ -1,6 +1,6 @@
 # micro-api-gateway-middleware
 
-"Middleware" to help verify API gateway requests.
+"Middleware" to help verify [micro-api-gateway](https://www.npmjs.com/package/micro-api-gateway) gateway requests.
 
 ## EXAMPLE
 
