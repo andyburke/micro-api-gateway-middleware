@@ -1,6 +1,6 @@
 {
   "name": "micro-api-gateway-middleware",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Middleware to verify a request originated from a particular micro-api-gateway",
   "main": "index.js",
   "scripts": {
