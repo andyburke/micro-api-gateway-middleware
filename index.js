@@ -17,10 +17,10 @@ module.exports = function( _options ) {
         public_key_endpoint: null,
         public_key: null,
         grace_period: 1000 * 60 * 5, // 5 minutes of grace on signature time,
-        skip_validation: false
+        skip_verification: false
     }, _options );
 
-    if ( options.skip_validation ) {
+    if ( options.skip_verification ) {
         console.warn( '!!! API GATEWAY VERIFICATION WILL BE SKIPPED !!!' );
     }
 
@@ -64,10 +64,10 @@ module.exports = function( _options ) {
 
     return async ( request, response ) => {
 
-        // if skip_validation is set, just return true
+        // if skip_verification is set, just return true
         // this should be used for internal testing only
-        if ( options.skip_validation ) {
-            response.setHeader( 'x-micro-api-gateway-validation-skipped', 'true' );
+        if ( options.skip_verification ) {
+            response.setHeader( 'x-micro-api-gateway-verification-skipped', 'true' );
             return true;
         }
 
