@@ -32,6 +32,24 @@ async function handle_request( request, response ) {
 ## BYPASSING
 
 If you'd like to bypass the gateway check, for instance, while you're testing
-or developing on your local machine. You can set the
-```SKIP_GATEWAY_VERIFICATION``` environment variable to a truthy value and
-all checks against the gateway will succeed.
+or developing on your local machine. You can pass the `skip_verification`
+option and all checks against the gateway will succeed. Eg:
+
+```javascript
+const is_from_gateway = require( 'micro-api-gateway-middleware' )( {
+    // skip verification if we're doing testing
+    skip_verification: process.env.TESTING,
+
+    // can get the API gateway's public key via an endpoint, or:
+    public_key_endpoint: 'https://your.gateway.com/public.pem',
+
+    // you could just specify the public key to trust
+    public_key: '<public key>',
+
+    // you can specify headers to verify in the request signature
+    headers_to_verify: [
+        'x-my-special-header',
+        'x-some-other-header'
+    ]
+} );
+```

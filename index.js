@@ -7,10 +7,6 @@ const json_stable_stringify = require( 'json-stable-stringify' );
 
 module.exports = function( _options ) {
 
-    if ( process.env.SKIP_GATEWAY_VERIFICATION ) {
-        console.warn( '!!! API GATEWAY VERIFICATION WILL BE SKIPPED (SKIP_GATEWAY_VERIFICATION SET IN ENV) !!!' );
-    }
-
     const options = Object.assign( {
         headers: {
             time: 'x-micro-api-gateway-signature-time',
@@ -20,8 +16,13 @@ module.exports = function( _options ) {
         headers_to_verify: [],
         public_key_endpoint: null,
         public_key: null,
-        grace_period: 1000 * 60 * 5 // 5 minutes of grace on signature time
+        grace_period: 1000 * 60 * 5, // 5 minutes of grace on signature time,
+        skip_validation: false
     }, _options );
+
+    if ( options.skip_validation ) {
+        console.warn( '!!! API GATEWAY VERIFICATION WILL BE SKIPPED !!!' );
+    }
 
     if ( !( options.public_key_endpoint || options.public_key ) ) {
         throw new Error( 'You must specify a public key or public key endpoint!' );
@@ -63,9 +64,10 @@ module.exports = function( _options ) {
 
     return async ( request, response ) => {
 
-        // if SKIP_GATEWAY_VERIFICATION is set, just return true
+        // if skip_validation is set, just return true
         // this should be used for internal testing only
-        if ( process.env.SKIP_GATEWAY_VERIFICATION ) {
+        if ( options.skip_validation ) {
+            response.setHeader( 'x-micro-api-gateway-validation-skipped', 'true' );
             return true;
         }
 
@@ -109,6 +111,10 @@ module.exports = function( _options ) {
             }
             return _headers_to_verify;
         }, {} );
+
+        // TODO: don't try to canonicalize the json here, which could open us up to weird parsing/serializing attacks.
+        //       instead, we should just sign the raw bytes of the request body concatenated with whichever headers we
+        //       care about
 
         const request_as_string = [ request.method, request.url, json_stable_stringify( headers_to_verify ) ].join( ':::' );
         const request_hash = crypto.createHash( 'SHA256' ).update( request_as_string ).digest( 'base64' );
